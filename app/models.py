@@ -48,7 +48,44 @@ class Author(SQLModel, table=True):
         default=None, sa_column=Column(Integer, primary_key=True, autoincrement=True)
     )
     name: str = Field(default=None)
+    biography: Optional[str] = None
+    birth_date: Optional[date] = None
+    death_date: Optional[date] = None
+    nationality: Optional[str] = None
     books: List["Book"] = Relationship(back_populates="author")
+
+
+class AuthorRead(SQLModel):
+    id: int
+    name: str
+    biography: Optional[str] = None
+    birth_date: Optional[date] = None
+    death_date: Optional[date] = None
+    nationality: Optional[str] = None
+
+
+class AuthorCreate(SQLModel):
+    name: str
+    biography: Optional[str] = None
+    birth_date: Optional[date] = None
+    death_date: Optional[date] = None
+    nationality: Optional[str] = None
+
+
+class AuthorUpdate(SQLModel):
+    name: Optional[str] = None
+    biography: Optional[str] = None
+    birth_date: Optional[date] = None
+    death_date: Optional[date] = None
+    nationality: Optional[str] = None
+
+
+class PaginatedAuthors(SQLModel):
+    items: List[AuthorRead]
+    total: int
+    page: int
+    size: int
+    total_pages: int
 
 
 class Category(SQLModel, table=True):
@@ -57,6 +94,11 @@ class Category(SQLModel, table=True):
     )
     name: str = Field(default=None)
     books: List["Book"] = Relationship(back_populates="category")
+
+
+class CategoryRead(SQLModel):
+    id: int
+    name: str
 
 
 class BookBase(SQLModel):
@@ -99,4 +141,10 @@ class BorrowRecord(SQLModel, table=True):
 
 class BorrowCreate(SQLModel):
     book_id: int
+    user_id: int
     due_date: date
+
+
+class ReturnBookRequest(SQLModel):
+    user_id: int
+    book_id: int

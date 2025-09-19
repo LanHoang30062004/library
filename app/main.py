@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from .database import init_db
-from .routers import auth, users, books, borrows
+from .routers import auth, users, books, borrows, author, category
 
 app = FastAPI(
     title="Library API",
@@ -24,6 +24,8 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(books.router)
 app.include_router(borrows.router)
+app.include_router(author.router)
+app.include_router(category.router)
 
 
 @app.on_event("startup")
