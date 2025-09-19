@@ -50,12 +50,16 @@ def return_book(
             status_code=400, detail="Borrow record not found or already returned"
         )
 
+    now = datetime.utcnow()
+    if now > rec.due_date:
+        raise HTTPException(status_code=400, detail="Book return is overdue!")
+
     book = session.get(Book, rec.book_id)
     if book:
         book.quantity += 1
         session.add(book)
 
-    rec.returned_at = datetime.utcnow()
+    rec.returned_at = now
     session.add(rec)
     session.commit()
     session.refresh(rec)
