@@ -12,6 +12,7 @@ from ..models import (
     Role,
     ReturnBookRequest,
     PaginatedResponse,
+    BorrowRecordOut,
 )
 
 router = APIRouter(prefix="/borrows", tags=["Borrows"])
@@ -83,12 +84,22 @@ def list_borrow_records(
     _: User = Depends(require_roles(Role.admin, Role.librarian)),
 ):
     total = session.exec(select(func.count()).select_from(BorrowRecord)).one()
-
     offset = (page - 1) * size
 
-    items = session.exec(
+    records = session.exec(
         select(BorrowRecord).order_by(BorrowRecord.id).offset(offset).limit(size)
     ).all()
+
+    items = [
+        BorrowRecordOut(
+            id=rec.id,
+            user_name=rec.user.username if rec.user else "N/A",
+            book_title=rec.book.title if rec.book else "N/A",
+            due_date=rec.due_date,
+            returned_at=rec.returned_at,
+        )
+        for rec in records
+    ]
 
     return PaginatedResponse(
         page=page,

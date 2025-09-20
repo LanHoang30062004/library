@@ -22,11 +22,26 @@ class UserBase(SQLModel):
     is_active: bool = True
 
 
+class BorrowRecord(SQLModel, table=True):
+    id: Optional[int] = Field(
+        default=None, sa_column=Column(Integer, primary_key=True, autoincrement=True)
+    )
+    user_id: int = Field(foreign_key="user.id")
+    book_id: int = Field(foreign_key="book.id")
+    borrowed_at: datetime = Field(default_factory=datetime.utcnow)
+    due_date: date
+    returned_at: Optional[datetime] = None
+
+    user: Optional["User"] = Relationship(back_populates="borrows")
+    book: Optional["Book"] = Relationship(back_populates="borrows")
+
+
 class User(UserBase, table=True):
     id: Optional[int] = Field(
         default=None, sa_column=Column(Integer, primary_key=True, autoincrement=True)
     )
     hashed_password: str
+    borrows: list[BorrowRecord] = Relationship(back_populates="user")
 
 
 class UserCreate(SQLModel):
@@ -115,6 +130,7 @@ class Book(BookBase, table=True):
     category_id: Optional[int] = Field(default=None, foreign_key="category.id")
     author: Optional[Author] = Relationship(back_populates="books")
     category: Optional[Category] = Relationship(back_populates="books")
+    borrows: list[BorrowRecord] = Relationship(back_populates="book")
 
 
 class BookCreate(BookBase):
@@ -128,17 +144,6 @@ class BookRead(BookBase):
     category_id: Optional[int]
 
 
-class BorrowRecord(SQLModel, table=True):
-    id: Optional[int] = Field(
-        default=None, sa_column=Column(Integer, primary_key=True, autoincrement=True)
-    )
-    user_id: int = Field(foreign_key="user.id")
-    book_id: int = Field(foreign_key="book.id")
-    borrowed_at: datetime = Field(default_factory=datetime.utcnow)
-    due_date: date
-    returned_at: Optional[datetime] = None
-
-
 class BorrowCreate(SQLModel):
     book_id: int
     user_id: int
@@ -149,8 +154,17 @@ class ReturnBookRequest(SQLModel):
     user_id: int
     book_id: int
 
+
+class BorrowRecordOut(SQLModel):
+    id: int
+    user_name: str
+    book_title: str
+    due_date: datetime
+    returned_at: Optional[datetime]
+
+
 class PaginatedResponse(SQLModel):
     page: int
     size: int
     total: int
-    items: List[BorrowRecord]
+    items: list[BorrowRecordOut]
