@@ -1,9 +1,18 @@
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func
 from sqlmodel import Session, select
 from ..deps import get_current_user, require_roles
 from ..database import get_session
-from ..models import BorrowRecord, BorrowCreate, Book, User, Role, ReturnBookRequest
+from ..models import (
+    BorrowRecord,
+    BorrowCreate,
+    Book,
+    User,
+    Role,
+    ReturnBookRequest,
+    PaginatedResponse,
+)
 
 router = APIRouter(prefix="/borrows", tags=["Borrows"])
 
@@ -64,3 +73,24 @@ def return_book(
     session.commit()
     session.refresh(rec)
     return rec
+
+
+@router.get("/", response_model=PaginatedResponse)
+def list_borrow_records(
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=100),
+    session: Session = Depends(get_session),
+    _: User = Depends(require_roles(Role.admin, Role.librarian)),
+):
+    total = session.exec(select(func.count()).select_from(BorrowRecord)).one()
+
+    offset = (page - 1) * size
+
+    items = session.exec(select(BorrowRecord).offset(offset).limit(size)).all()
+
+    return PaginatedResponse(
+        page=page,
+        size=size,
+        total=total,
+        items=items,
+    )

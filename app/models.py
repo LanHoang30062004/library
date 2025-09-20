@@ -148,3 +148,9 @@ class BorrowCreate(SQLModel):
 class ReturnBookRequest(SQLModel):
     user_id: int
     book_id: int
+
+class PaginatedResponse(SQLModel):
+    page: int
+    size: int
+    total: int
+    items: List[BorrowRecord]
