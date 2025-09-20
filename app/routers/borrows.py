@@ -86,7 +86,9 @@ def list_borrow_records(
 
     offset = (page - 1) * size
 
-    items = session.exec(select(BorrowRecord).offset(offset).limit(size)).all()
+    items = session.exec(
+        select(BorrowRecord).order_by(BorrowRecord.id).offset(offset).limit(size)
+    ).all()
 
     return PaginatedResponse(
         page=page,
