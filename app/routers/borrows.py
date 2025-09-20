@@ -97,6 +97,9 @@ def list_borrow_records(
             book_title=rec.book.title if rec.book else "N/A",
             due_date=rec.due_date,
             returned_at=rec.returned_at,
+            borrowed_at=rec.borrowed_at,
+            user_id=rec.user_id,
+            book_id=rec.book_id,
         )
         for rec in records
     ]

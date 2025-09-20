@@ -160,6 +160,9 @@ class BorrowRecordOut(SQLModel):
     user_name: str
     book_title: str
     due_date: datetime
+    borrowed_at : datetime 
+    user_id : int 
+    book_id : int
     returned_at: Optional[datetime]
 
 
